@@ -1,7 +1,34 @@
 const dns = require("dns");
 const mongoose = require("mongoose");
 
-const MONGODB_URI = "mongodb+srv://yadirtf0_db_user:zR2D5MKsjE4A4RCq@mio.nwi2k2d.mongodb.net/simulacion?appName=mio";
+const fs = require("fs");
+const path = require("path");
+
+// Cargar MONGODB_URI desde .env.local si existe
+const envPath = path.join(__dirname, ".env.local");
+let env = {};
+try {
+  const envConfig = fs.readFileSync(envPath, "utf-8");
+  envConfig.split("\n").forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) return;
+    const parts = trimmed.split("=");
+    if (parts.length >= 2) {
+      const key = parts[0].trim();
+      const val = parts.slice(1).join("=").trim();
+      env[key] = val;
+    }
+  });
+} catch (e) {
+  // Ignorar si no existe
+}
+
+const MONGODB_URI = env.MONGODB_URI || process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error("❌ ERROR: MONGODB_URI no está definido en .env.local o variables de entorno.");
+  process.exit(1);
+}
 
 console.log("=== INICIANDO DIAGNÓSTICO DE RED Y CONEXIÓN ===");
 
